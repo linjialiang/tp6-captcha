@@ -1,10 +1,10 @@
 {
-    "name": "topthink/think-captcha",
-    "description": "captcha package for thinkphp",
+    "name": "linjialiang/tp6-captcha",
+    "description": "captcha package for ThinkPHP 6.0",
     "authors": [
         {
-            "name": "yunwuxin",
-            "email": "448901948@qq.com"
+            "name": "linjialiang",
+            "email": "linjialiang@163.com"
         }
     ],
     "license": "Apache-2.0",
@@ -13,7 +13,7 @@
     },
     "autoload": {
         "psr-4": {
-            "think\\captcha\\": "src/"
+            "linjialiang\\captcha\\": "src/"
         },
         "files": [
             "src/helper.php"
@@ -22,11 +22,11 @@
     "extra": {
         "think": {
             "services": [
-                "think\\captcha\\CaptchaService"
+                "linjialiang\\captcha\\CaptchaService"
             ],
             "config":{
                 "captcha": "src/config.php"
-            }            
+            }
         }
     },
     "minimum-stability": "dev"
