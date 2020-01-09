@@ -1,6 +1,6 @@
 <?php
 
-namespace think\captcha;
+namespace linjialiang\captcha;
 
 use think\Route;
 use think\Service;
@@ -10,7 +10,7 @@ class CaptchaService extends Service
 {
     public function boot(Route $route)
     {
-        $route->get('captcha/[:config]', "\\think\\captcha\\CaptchaController@index");
+        $route->get('captcha/[:config]', "\\linjialiang\\captcha\\CaptchaController@index");
 
         Validate::maker(function ($validate) {
             $validate->extend('captcha', function ($value) {

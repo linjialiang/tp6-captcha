@@ -9,7 +9,7 @@
 // | Author: yunwuxin <448901948@qq.com>
 // +----------------------------------------------------------------------
 
-use think\captcha\facade\Captcha;
+use linjialiang\captcha\facade\Captcha;
 use think\facade\Route;
 use think\Response;
 
@@ -38,7 +38,7 @@ function captcha_src($config = null): string
 function captcha_img($id = '', $domid = ''): string
 {
     $src = captcha_src($id);
-  
+
     $domid = empty($domid) ? $domid : "id='" . $domid . "'";
 
     return "<img src='{$src}' alt='captcha' " . $domid . " onclick='this.src=\"{$src}?\"+Math.random();' />";
