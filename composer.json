@@ -9,7 +9,7 @@
     ],
     "license": "Apache-2.0",
     "require": {
-        "topthink/framework": "^6.0.x"
+        "topthink/framework": "^6.0.1"
     },
     "autoload": {
         "psr-4": {
