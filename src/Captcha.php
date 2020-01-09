@@ -206,7 +206,7 @@ class Captcha
         $this->imageH || $this->imageH = $this->fontSize * 2.5;
 
         // 创建验证码对象
-        $imagick_img= new \Imagick();
+        $imagick_img = new \Imagick();
         // 验证码样式
         $imagick_draw = new \ImagickDraw();
         // 建立一幅 $this->imageW x $this->imageH 的图像
@@ -215,17 +215,6 @@ class Captcha
         // $this->im = imagecreate($this->imageW, $this->imageH);
         // 设置背景
         // imagecolorallocate($this->im, $this->bg[0], $this->bg[1], $this->bg[2]);
-
-        // 验证码字体随机颜色
-        $imagick_draw->setFillColor(
-            'rgb(' .
-            mt_rand(1, 150)
-            .',' .
-            mt_rand(1, 150)
-            . ',' .
-            mt_rand(1, 150)
-            . ')'
-        );
 
         // 验证码使用随机字体
         $ttfPath = __DIR__ . '/../assets/' . ($this->math ? 'mathttfs' : ($this->useZh ? 'zhttfs' : 'ttfs')) . '/';
@@ -244,11 +233,6 @@ class Captcha
 
         $fontttf = $ttfPath . $this->fontttf;
 
-        // 设置字体
-        $imagick_draw->setFont($fontttf);
-        // 设置字体大小
-        $imagick_draw->setFontSize($this->fontSize);
-
         if ($this->useImgBg) {
             $this->background();
         }
@@ -265,6 +249,11 @@ class Captcha
         // 绘验证码
         $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $generator['value']) : str_split($generator['value']); // 验证码
 
+        // 设置字体
+        $imagick_draw->setFont($fontttf);
+        // 设置字体大小
+        $imagick_draw->setFontSize($this->fontSize);
+
         foreach ($text as $index => $char) {
 
             $x     = $this->fontSize * ($index + 1) * mt_rand(1.2, 1.6) * ($this->math ? 1 : 1.5);
@@ -273,9 +262,23 @@ class Captcha
 
             // imagettftext($this->im, $this->fontSize, $angle, $x, $y, $this->color, $fontttf, $char);
             $imagick_draw->annotation($x, $y, $char);
-            $imagick_img->setImageFormat("png");
-            $imagick_img->drawImage($imagick_draw);
+            // 验证码字体随机颜色
+            $imagick_draw->setFillColor(
+                'rgb(' .
+                    mt_rand(1, 150)
+                    . ',' .
+                    mt_rand(1, 150)
+                    . ',' .
+                    mt_rand(1, 150)
+                    . ')'
+            );
         }
+
+        // imagick画贝塞尔曲线
+        // $imagick_draw->pathCurveToAbsolute(float $x1 , float $y1 , float $x2 , float $y2 , float $x , float $y);
+
+        $imagick_img->drawImage($imagick_draw);
+        $imagick_img->setImageFormat("png");
 
         ob_start();
         // 输出图像
