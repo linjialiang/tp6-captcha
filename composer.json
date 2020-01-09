@@ -1,0 +1,34 @@
+{
+    "name": "linjialiang/tp6-captcha",
+    "description": "captcha package for ThinkPHP 6.0",
+    "authors": [
+        {
+            "name": "linjialiang",
+            "email": "linjialiang@163.com"
+        }
+    ],
+    "license": "Apache-2.0",
+    "require": {
+        "topthink/framework": "^6.0.1",
+        "ext-imagick": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "linjialiang\\captcha\\": "src/"
+        },
+        "files": [
+            "src/helper.php"
+        ]
+    },
+    "extra": {
+        "think": {
+            "services": [
+                "linjialiang\\captcha\\CaptchaService"
+            ],
+            "config":{
+                "captcha": "src/config.php"
+            }
+        }
+    },
+    "minimum-stability": "stable"
+}
