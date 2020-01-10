@@ -4,7 +4,7 @@
 // +----------------------------------------------------------------------
 
 return [
-    //验证码位数
+    // 验证码位数
     'length'   => 5,
     // 验证码字符集合
     'codeSet'  => '2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY',
@@ -16,16 +16,18 @@ return [
     'math'     => false,
     // 是否使用背景图
     'useImgBg' => false,
-    //验证码字符大小
+    // 验证码字符大小
     'fontSize' => 25,
     // 是否使用混淆曲线
     'useCurve' => false,
-    //是否添加杂点
+    // 是否添加杂点
     'useNoise' => false,
     // 验证码字体 不设置则随机
     'fontttf'  => '',
-    //背景颜色
-    'bg'       => 'rgba(243, 251, 254, 1)',
+    // 背景颜色
+    'bg'       => '',
+    // 验证码颜色
+    'color'    => '',
     // 验证码图片高度
     'imageH'   => 0,
     // 验证码图片宽度

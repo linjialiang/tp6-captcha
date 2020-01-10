@@ -12,7 +12,6 @@
 namespace linjialiang\captcha;
 
 use Exception;
-use ImagickPixel;
 use think\Config;
 use think\Response;
 use think\Session;
@@ -29,36 +28,43 @@ class Captcha
      */
     private $session = null;
 
+    // 验证码实例
+    private $im = null;
+    // 验证码渲染实例
+    private $draw = null;
+
+    // 验证码颜色
+    protected string $color = '';
     // 验证码字符集合
-    protected $codeSet = '2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY';
+    protected string $codeSet = '2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY';
     // 验证码过期时间（s）
-    protected $expire = 1800;
+    protected int $expire = 1800;
     // 使用中文验证码
-    protected $useZh = false;
+    protected bool $useZh = false;
     // 中文验证码字符串
-    protected $zhSet = '赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张孔曹严华金魏陶姜戚谢邹喻柏水窦章云苏潘葛奚范彭郎鲁韦昌马苗凤花方俞任袁柳酆鲍史唐费廉岑薛雷贺倪汤滕殷罗毕郝邬安常乐于时傅皮卞齐康伍余元卜顾孟平黄和穆萧尹姚邵湛汪祁毛禹狄米贝明臧计伏成戴谈宋茅庞熊纪舒屈项祝董梁杜阮蓝闵席季麻强贾路娄危江童颜郭梅盛林刁钟徐邱骆高夏蔡田樊胡凌霍虞万支柯昝管卢莫经房裘缪干解应宗丁宣贲邓郁单杭洪包诸左石崔吉钮龚程嵇邢滑裴陆荣翁荀羊於惠甄曲家封芮羿储靳汲邴糜松井段富巫乌焦巴弓牧隗山谷车侯宓蓬全郗班仰秋仲伊宫宁仇栾暴甘钭厉戎祖武符刘景詹束龙叶幸司韶郜黎蓟薄印宿白怀蒲邰从鄂索咸籍赖卓蔺屠蒙池乔阴胥能苍双闻莘党翟谭贡劳逄姬申扶堵冉宰郦雍璩桑桂濮牛寿通边扈燕冀郏浦尚农温别庄晏柴瞿阎充慕连茹习宦艾鱼容向古易慎戈廖庾终暨居衡步都耿满弘匡国文寇广禄阙东欧殳沃利蔚越夔隆师巩厍聂晁勾敖融冷訾辛阚那简饶空曾毋沙乜养鞠须丰巢关蒯相查后荆红游竺权逯盖益桓公万俟司马上官欧阳夏侯诸葛闻人东方赫连皇甫尉迟公羊澹台公冶宗政濮阳淳于单于太叔申屠公孙仲孙轩辕令狐钟离宇文长孙慕容鲜于闾丘司徒司空丌官司寇仉督子车颛孙端木巫马公西漆雕乐正壤驷公良拓跋夹谷宰父谷梁晋楚闫法汝鄢涂钦段干百里东郭南门呼延归海羊舌微生岳帅缑亢况有琴梁丘左丘东门西门商牟佘佴伯赏南宫墨哈谯笪年爱阳佟第五言福';
+    protected string $zhSet = '赵钱孙李周吴郑王冯陈褚卫蒋沈韩杨朱秦尤许何吕施张孔曹严华金魏陶姜戚谢邹喻柏水窦章云苏潘葛奚范彭郎鲁韦昌马苗凤花方俞任袁柳酆鲍史唐费廉岑薛雷贺倪汤滕殷罗毕郝邬安常乐于时傅皮卞齐康伍余元卜顾孟平黄和穆萧尹姚邵湛汪祁毛禹狄米贝明臧计伏成戴谈宋茅庞熊纪舒屈项祝董梁杜阮蓝闵席季麻强贾路娄危江童颜郭梅盛林刁钟徐邱骆高夏蔡田樊胡凌霍虞万支柯昝管卢莫经房裘缪干解应宗丁宣贲邓郁单杭洪包诸左石崔吉钮龚程嵇邢滑裴陆荣翁荀羊於惠甄曲家封芮羿储靳汲邴糜松井段富巫乌焦巴弓牧隗山谷车侯宓蓬全郗班仰秋仲伊宫宁仇栾暴甘钭厉戎祖武符刘景詹束龙叶幸司韶郜黎蓟薄印宿白怀蒲邰从鄂索咸籍赖卓蔺屠蒙池乔阴胥能苍双闻莘党翟谭贡劳逄姬申扶堵冉宰郦雍璩桑桂濮牛寿通边扈燕冀郏浦尚农温别庄晏柴瞿阎充慕连茹习宦艾鱼容向古易慎戈廖庾终暨居衡步都耿满弘匡国文寇广禄阙东欧殳沃利蔚越夔隆师巩厍聂晁勾敖融冷訾辛阚那简饶空曾毋沙乜养鞠须丰巢关蒯相查后荆红游竺权逯盖益桓公万俟司马上官欧阳夏侯诸葛闻人东方赫连皇甫尉迟公羊澹台公冶宗政濮阳淳于单于太叔申屠公孙仲孙轩辕令狐钟离宇文长孙慕容鲜于闾丘司徒司空丌官司寇仉督子车颛孙端木巫马公西漆雕乐正壤驷公良拓跋夹谷宰父谷梁晋楚闫法汝鄢涂钦段干百里东郭南门呼延归海羊舌微生岳帅缑亢况有琴梁丘左丘东门西门商牟佘佴伯赏南宫墨哈谯笪年爱阳佟第五言福';
     // 使用背景图片
-    protected $useImgBg = false;
+    protected bool $useImgBg = false;
     // 验证码字体大小(px)
-    protected $fontSize = 25;
+    protected int $fontSize = 25;
     // 是否画混淆曲线
-    protected $useCurve = false;
+    protected bool $useCurve = false;
     // 是否添加杂点
-    protected $useNoise = false;
+    protected bool $useNoise = false;
     // 验证码图片高度
-    protected $imageH = 0;
+    protected int $imageH = 0;
     // 验证码图片宽度
-    protected $imageW = 0;
+    protected int $imageW = 0;
     // 验证码位数
-    protected $length = 5;
+    protected int $length = 5;
     // 验证码字体，不设置随机获取
-    protected $fontttf = '';
+    protected string $fontttf = '';
     // 背景颜色
-    protected $bg = 'rgba(243, 251, 254, 1)';
+    protected string $bg = '';
     // 算术验证码
-    protected $math = false;
-    // 随机运算符号，支持加、减、乘、除、取模5种运算
-    protected $operators = ['+', '-', '*', '/', '%'];
+    protected bool $math = false;
+    // 随机运算符号，支持加(+)、减(-)、乘(*)、除(/)、取模(%)5种运算
+    protected array $operators = [];
 
     /**
      * 架构方法 设置参数
@@ -70,19 +76,6 @@ class Captcha
     {
         $this->config  = $config;
         $this->session = $session;
-    }
-
-    /**
-     * 获取验证码
-     */
-    protected function text()
-    {
-        $generator = $this->generate();
-
-        // 验证码，是一个索引数组
-        $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $generator['value']) : str_split($generator['value']);
-
-        return $text;
     }
 
     /**
@@ -120,7 +113,7 @@ class Captcha
             $x   = random_int(10, 30);
             $y   = random_int(1, 9);
 
-            switch ($this->operators[array_rand($this->operators)]) {
+            switch ($this->operators ? $this->operators[array_rand($this->operators)] : '+') {
                 case '-':
                     $bag = "{$x} - {$y} = ";
                     $key = $x - $y;
@@ -223,12 +216,12 @@ class Captcha
             }
             $dir->close();
             $gb = $bgs[array_rand($bgs)];
-            $this->imagick_img =  new \Imagick($gb);
-            $this->imagick_img->resizeImage($this->imageW, $this->imageH, \Imagick::FILTER_POINT, 1);
+            $this->im = new \Imagick($gb);
+            $this->im->resizeImage($this->imageW, $this->imageH, \Imagick::FILTER_POINT, 1);
         } else {
-            $this->imagick_img =  new \Imagick();
+            $this->im =  new \Imagick();
             // 建立一幅大小为 $this->imageW * $this->imageH 的画布，背景色为 $this->bg
-            $this->imagick_img->newImage($this->imageW, $this->imageH, $this->bg);
+            $this->im->newImage($this->imageW, $this->imageH, $this->bg ? $this->bg : 'rgba(243, 251, 254, 1)');
         }
 
         $this->draw = new \ImagickDraw();
@@ -250,14 +243,17 @@ class Captcha
 
         // 字体全路径
         $fontttf = $ttfPath . $this->fontttf;
-        // 绘验证码
-        $text = $this->text();
         // 设置验证码字体
         $this->draw->setFont($fontttf);
         // 设置验证码字体大小
         $this->draw->setFontSize($this->fontSize);
 
-        // 将验证码，挨个画出来
+        // 获取创建好的验证码
+        $generator = $this->generate();
+        // 将验证码从字符串转成数组
+        $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $generator['value']) : str_split($generator['value']);
+
+        // 将验证码字符，挨个画出来
         foreach ($text as $index => $char) {
             $x     = $this->fontSize * ($index + 1) * mt_rand(1.2, 1.6) * ($this->math ? 1 : 1.5);
             $y     = $this->fontSize + mt_rand(10, 20);
@@ -268,15 +264,19 @@ class Captcha
             // 验证码文字在x轴上的倾斜角度
             $this->draw->skewX($angle);
             // 验证码文字颜色
-            $this->draw->setFillColor(
-                'rgb(' .
-                    mt_rand(1, 150)
-                    . ',' .
-                    mt_rand(1, 150)
-                    . ',' .
-                    mt_rand(1, 150)
-                    . ')'
-            );
+            if (!$this->color) {
+                $this->draw->setFillColor(
+                    'rgb(' .
+                        mt_rand(1, 150)
+                        . ',' .
+                        mt_rand(1, 150)
+                        . ',' .
+                        mt_rand(1, 150)
+                        . ')'
+                );
+            } else {
+                $this->draw->setFillColor($this->color);
+            }
         }
 
         if ($this->useCurve) {
@@ -290,15 +290,15 @@ class Captcha
         }
 
         // 验证码输出格式
-        $this->imagick_img->setImageFormat("png");
+        $this->im->setImageFormat("png");
         // 验证码最终输出的样式
-        $this->imagick_img->drawImage($this->draw);
+        $this->im->drawImage($this->draw);
         ob_start();
         // 输出图像
-        echo $this->imagick_img;
+        echo $this->im;
         $content = ob_get_clean();
         // 销毁imagick对象
-        $this->imagick_img->destroy();
+        $this->im->destroy();
         return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
     }
 
@@ -321,11 +321,11 @@ class Captcha
         // 文本随机颜色（验证码颜色）
         $this->draw->setFillColor(
             'rgb(' .
-                mt_rand(1, 150)
+                mt_rand(150, 225)
                 . ',' .
-                mt_rand(1, 150)
+                mt_rand(150, 225)
                 . ',' .
-                mt_rand(1, 150)
+                mt_rand(150, 225)
                 . ')'
         );
 
@@ -381,27 +381,39 @@ class Captcha
      */
     protected function writeNoise(): void
     {
-        $text = $this->text();
+        $bag = '';
 
-        for ($i = 0; $i < 10; $i++) {
-            foreach ($text as $index => $char) {
-                // 文本字体大小
-                $this->draw->setFontSize($this->fontSize / 2);
-                // 文本随机颜色（验证码颜色）
-                $this->draw->setFillColor(
-                    'rgba(' .
-                        mt_rand(150, 225)
-                        . ',' .
-                        mt_rand(150, 225)
-                        . ',' .
-                        mt_rand(150, 225)
-                        . ',' .
-                        0.8
-                        . ')'
-                );
-                // 图片上插入随机文本（验证码）
-                $this->draw->annotation(mt_rand(-10, $this->imageW), mt_rand(-10, $this->imageH), $char);
-            }
+        if (!$this->math && $this->useZh) {
+            $characters = preg_split('/(?<!^)(?!$)/u', $this->zhSet);
+        } else {
+            $characters = str_split($this->codeSet);
+        }
+
+        for ($i = 0; $i < 30; $i++) {
+            $bag .= $characters[rand(0, count($characters) - 1)];
+        }
+
+        $key = mb_strtolower($bag, 'UTF-8');
+
+        $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $key) : str_split($key);
+
+        foreach ($text as $index => $char) {
+            // 文本字体大小
+            $this->draw->setFontSize($this->fontSize * 4 / 5);
+            // 文本随机颜色（验证码颜色）
+            $this->draw->setFillColor(
+                'rgba(' .
+                    mt_rand(150, 225)
+                    . ',' .
+                    mt_rand(150, 225)
+                    . ',' .
+                    mt_rand(150, 225)
+                    . ',' .
+                    mt_rand(5, 8) / 10
+                    . ')'
+            );
+            // 图片上插入随机文本（验证码）
+            $this->draw->annotation(mt_rand(-10, $this->imageW), mt_rand(-10, $this->imageH), $char);
         }
     }
 }
