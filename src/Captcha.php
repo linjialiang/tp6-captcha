@@ -45,9 +45,9 @@ class Captcha
     // 验证码字体大小(px)
     protected $fontSize = 25;
     // 是否画混淆曲线
-    protected $useCurve = true;
+    protected $useCurve = false;
     // 是否添加杂点
-    protected $useNoise = true;
+    protected $useNoise = false;
     // 验证码图片高度
     protected $imageH = 0;
     // 验证码图片宽度
@@ -57,7 +57,6 @@ class Captcha
     // 验证码字体，不设置随机获取
     protected $fontttf = '';
     // 背景颜色
-    // protected $bg = [243, 251, 254];
     protected $bg = 'rgba(243, 251, 254, 1)';
     // 算术验证码
     protected $math = false;
@@ -74,8 +73,22 @@ class Captcha
     {
         $this->config  = $config;
         $this->session = $session;
-        $this->imagick_img =  new \Imagick();    // 创建验证码对象
-        $this->imagick_draw = new \ImagickDraw();       // 验证码样式
+
+        $this->imagick_img =  new \Imagick();   // imagick 对象
+        $this->imagick_draw = new \ImagickDraw();   // imagick 渲染对象
+    }
+
+    /**
+     * 获取验证码
+     */
+    protected function text()
+    {
+        $generator = $this->generate();
+
+        // 验证码，是一个索引数组
+        $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $generator['value']) : str_split($generator['value']);
+
+        return $text;
     }
 
     /**
@@ -200,19 +213,17 @@ class Captcha
     {
         $this->configure($config);
 
-        $generator = $this->generate();
-
         // 图片宽(px)
         $this->imageW || $this->imageW = $this->length * $this->fontSize * 1.5 + $this->length * $this->fontSize / 2;
         // 图片高(px)
         $this->imageH || $this->imageH = $this->fontSize * 2.5;
-
-        // 建立一幅 $this->imageW x $this->imageH 的图像
+        // 建立一幅大小为 $this->imageW * $this->imageH 的画布，背景色为 $this->bg
         $this->im = $this->imagick_img->newImage($this->imageW, $this->imageH, $this->bg);
 
-        // $this->im = imagecreate($this->imageW, $this->imageH);
-        // 设置背景
-        // imagecolorallocate($this->im, $this->bg[0], $this->bg[1], $this->bg[2]);
+        if ($this->useImgBg) {
+            // 背景图片
+            $this->background();
+        }
 
         // 验证码使用随机字体
         $ttfPath = __DIR__ . '/../assets/' . ($this->math ? 'mathttfs' : ($this->useZh ? 'zhttfs' : 'ttfs')) . '/';
@@ -229,40 +240,26 @@ class Captcha
             $this->fontttf = $ttfs[array_rand($ttfs)];
         }
 
+        // 字体全路径
         $fontttf = $ttfPath . $this->fontttf;
-
-        if ($this->useImgBg) {
-            $this->background();
-        }
-
-        if ($this->useNoise) {
-            // 绘杂点
-            $this->writeNoise();
-        }
-        if ($this->useCurve) {
-            // 绘干扰线
-            $this->writeCurve();
-        }
-
         // 绘验证码
-        $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $generator['value']) : str_split($generator['value']); // 验证码
-
-        // 设置字体
+        $text = $this->text();
+        // 设置验证码字体
         $this->imagick_draw->setFont($fontttf);
-        // 设置字体大小
+        // 设置验证码字体大小
         $this->imagick_draw->setFontSize($this->fontSize);
 
+        // 将验证码，挨个画出来
         foreach ($text as $index => $char) {
-
             $x     = $this->fontSize * ($index + 1) * mt_rand(1.2, 1.6) * ($this->math ? 1 : 1.5);
             $y     = $this->fontSize + mt_rand(10, 20);
-            $angle = $this->math ? 0 : mt_rand(-40, 40);
+            $angle = $this->math ? 0 : mt_rand(-20, 20);
 
-            // 文本随机倾斜角度
-            $this->imagick_draw->skewX($angle);
-            // 图片上插入随机文本（验证码）
+            // 验证码文字以及坐标
             $this->imagick_draw->annotation($x, $y, $char);
-            // 文本随机颜色（验证码颜色）
+            // 验证码文字在x轴上的倾斜角度
+            $this->imagick_draw->skewX($angle);
+            // 验证码文字颜色
             $this->imagick_draw->setFillColor(
                 'rgb(' .
                     mt_rand(1, 150)
@@ -274,18 +271,27 @@ class Captcha
             );
         }
 
-        $this->writeCurve();
+        if ($this->useCurve) {
+            // 绘干扰线
+            $this->writeCurve();
+        }
 
+        if ($this->useNoise) {
+            // 绘杂点
+            $this->writeNoise();
+        }
+
+        // 验证码输出格式
         $this->imagick_img->setImageFormat("png");
+        // 验证码最终输出的样式
         $this->imagick_img->drawImage($this->imagick_draw);
 
         ob_start();
         // 输出图像
-        // imagepng($this->im);
         echo $this->imagick_img;
         $content = ob_get_clean();
-        // imagedestroy($this->im);
-
+        // 销毁imagick对象
+        $this->imagick_img->destroy();
         return response($content, 200, ['Content-Length' => strlen($content)])->contentType('image/png');
     }
 
@@ -305,6 +311,16 @@ class Captcha
     {
         // imagick 画贝塞尔曲线
         $px = $py = 0;
+        // 文本随机颜色（验证码颜色）
+        $this->imagick_draw->setFillColor(
+            'rgb(' .
+                mt_rand(1, 150)
+                . ',' .
+                mt_rand(1, 150)
+                . ',' .
+                mt_rand(1, 150)
+                . ')'
+        );
 
         // 曲线前部分
         $A = mt_rand(1, $this->imageH / 2); // 振幅
@@ -354,17 +370,30 @@ class Captcha
 
     /**
      * 画杂点
-     * 往图片上写不同颜色的字母或数字
+     * 往图片上写不同颜色的文字
      */
     protected function writeNoise(): void
     {
-        $codeSet = '2345678abcdefhijkmnpqrstuvwxyz';
+        $text = $this->text();
+
         for ($i = 0; $i < 10; $i++) {
-            //杂点颜色
-            $noiseColor = imagecolorallocate($this->im, mt_rand(150, 225), mt_rand(150, 225), mt_rand(150, 225));
-            for ($j = 0; $j < 5; $j++) {
-                // 绘杂点
-                imagestring($this->im, 5, mt_rand(-10, $this->imageW), mt_rand(-10, $this->imageH), $codeSet[mt_rand(0, 29)], $noiseColor);
+            foreach ($text as $index => $char) {
+                // 文本字体大小
+                $this->imagick_draw->setFontSize($this->fontSize / 2);
+                // 文本随机颜色（验证码颜色）
+                $this->imagick_draw->setFillColor(
+                    'rgba(' .
+                        mt_rand(150, 225)
+                        . ',' .
+                        mt_rand(150, 225)
+                        . ',' .
+                        mt_rand(150, 225)
+                        . ',' .
+                        0.8
+                        . ')'
+                );
+                // 图片上插入随机文本（验证码）
+                $this->imagick_draw->annotation(mt_rand(-10, $this->imageW), mt_rand(-10, $this->imageH), $char);
             }
         }
     }
