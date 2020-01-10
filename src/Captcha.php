@@ -74,6 +74,8 @@ class Captcha
     {
         $this->config  = $config;
         $this->session = $session;
+        $this->imagick_img =  new \Imagick();    // 创建验证码对象
+        $this->imagick_draw = new \ImagickDraw();       // 验证码样式
     }
 
     /**
@@ -205,12 +207,8 @@ class Captcha
         // 图片高(px)
         $this->imageH || $this->imageH = $this->fontSize * 2.5;
 
-        // 创建验证码对象
-        $imagick_img = new \Imagick();
-        // 验证码样式
-        $imagick_draw = new \ImagickDraw();
         // 建立一幅 $this->imageW x $this->imageH 的图像
-        $this->im = $imagick_img->newImage($this->imageW, $this->imageH, $this->bg);
+        $this->im = $this->imagick_img->newImage($this->imageW, $this->imageH, $this->bg);
 
         // $this->im = imagecreate($this->imageW, $this->imageH);
         // 设置背景
@@ -250,9 +248,9 @@ class Captcha
         $text = $this->useZh ? preg_split('/(?<!^)(?!$)/u', $generator['value']) : str_split($generator['value']); // 验证码
 
         // 设置字体
-        $imagick_draw->setFont($fontttf);
+        $this->imagick_draw->setFont($fontttf);
         // 设置字体大小
-        $imagick_draw->setFontSize($this->fontSize);
+        $this->imagick_draw->setFontSize($this->fontSize);
 
         foreach ($text as $index => $char) {
 
@@ -260,10 +258,12 @@ class Captcha
             $y     = $this->fontSize + mt_rand(10, 20);
             $angle = $this->math ? 0 : mt_rand(-40, 40);
 
-            // imagettftext($this->im, $this->fontSize, $angle, $x, $y, $this->color, $fontttf, $char);
-            $imagick_draw->annotation($x, $y, $char);
-            // 验证码字体随机颜色
-            $imagick_draw->setFillColor(
+            // 文本随机倾斜角度
+            $this->imagick_draw->skewX($angle);
+            // 图片上插入随机文本（验证码）
+            $this->imagick_draw->annotation($x, $y, $char);
+            // 文本随机颜色（验证码颜色）
+            $this->imagick_draw->setFillColor(
                 'rgb(' .
                     mt_rand(1, 150)
                     . ',' .
@@ -274,16 +274,15 @@ class Captcha
             );
         }
 
-        // imagick画贝塞尔曲线
-        // $imagick_draw->pathCurveToAbsolute(float $x1 , float $y1 , float $x2 , float $y2 , float $x , float $y);
+        $this->writeCurve();
 
-        $imagick_img->drawImage($imagick_draw);
-        $imagick_img->setImageFormat("png");
+        $this->imagick_img->setImageFormat("png");
+        $this->imagick_img->drawImage($this->imagick_draw);
 
         ob_start();
         // 输出图像
         // imagepng($this->im);
-        echo $imagick_img;
+        echo $this->imagick_img;
         $content = ob_get_clean();
         // imagedestroy($this->im);
 
@@ -304,6 +303,7 @@ class Captcha
      */
     protected function writeCurve(): void
     {
+        // imagick 画贝塞尔曲线
         $px = $py = 0;
 
         // 曲线前部分
@@ -320,10 +320,12 @@ class Captcha
             if (0 != $w) {
                 $py = $A * sin($w * $px + $f) + $b + $this->imageH / 2; // y = Asin(ωx+φ) + b
                 $i  = (int) ($this->fontSize / 5);
+                $coord = [];    // 坐标
                 while ($i > 0) {
-                    imagesetpixel($this->im, $px + $i, $py + $i, $this->color); // 这里(while)循环画像素点比imagettftext和imagestring用字体大小一次画出（不用这while循环）性能要好很多
+                    $coord[] = ['x' => $px + $i, 'y' => $py + $i];
                     $i--;
                 }
+                $this->imagick_draw->bezier($coord);
             }
         }
 
@@ -340,10 +342,12 @@ class Captcha
             if (0 != $w) {
                 $py = $A * sin($w * $px + $f) + $b + $this->imageH / 2; // y = Asin(ωx+φ) + b
                 $i  = (int) ($this->fontSize / 5);
+                $coord = [];    // 坐标
                 while ($i > 0) {
-                    imagesetpixel($this->im, $px + $i, $py + $i, $this->color);
+                    $coord[] = ['x' => $px + $i, 'y' => $py + $i];
                     $i--;
                 }
+                $this->imagick_draw->bezier($coord);
             }
         }
     }
