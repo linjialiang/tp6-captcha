@@ -399,7 +399,7 @@ class Captcha
 
         foreach ($text as $index => $char) {
             // 文本字体大小
-            $this->draw->setFontSize($this->fontSize * 4 / 5);
+            $this->draw->setFontSize($this->fontSize / 2);
             // 文本随机颜色（验证码颜色）
             $this->draw->setFillColor(
                 'rgba(' .
@@ -409,7 +409,7 @@ class Captcha
                     . ',' .
                     mt_rand(150, 225)
                     . ',' .
-                    mt_rand(5, 8) / 10
+                    mt_rand(3, 5) / 10
                     . ')'
             );
             // 图片上插入随机文本（验证码）
