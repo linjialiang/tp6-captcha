@@ -233,7 +233,7 @@ class Captcha
             $dir  = dir($fontPath);
             $fontArray = [];
             while (false !== ($file = $dir->read())) {
-                if ('.' != $file[0] && (substr($file, -4) == '.woff2' || substr($file, -4) == '.ttf' || substr($file, -4) == '.woff')) {
+                if ('.' != $file[0] && preg_match("/^\.(ttf|ttc|otc)$/i", substr($file, -4))) {
                     $fontArray[] = $file;
                 }
             }

@@ -77,7 +77,7 @@ if(!captcha_check($captcha)){
 | assets/fonts@zh | 中文字符集 |
 | assets/math     | 算术字符集 |
 
-支持 3 种类型的字体： `ttf` 、 `woff` 、 `woff2`
+支持 3 种类型的字体： `ttf` 、 `ttc` 、 `otc`
 
 ### 字符集内容：
 
