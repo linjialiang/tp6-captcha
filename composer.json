@@ -1,6 +1,6 @@
 {
     "name": "linjialiang/tp6-captcha",
-    "description": "captcha package for ThinkPHP 6.0",
+    "description": "The Captcha class library for ThinkPHP 6.0, which relies on php_Imagick",
     "authors": [
         {
             "name": "linjialiang",
