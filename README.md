@@ -14,6 +14,14 @@ thinkphp6 验证码类库
 
 ## 使用
 
+### 启用 Session
+
+`Session` 功能默认是没有开启的（验证码需要用到 Session），需要在全局的中间件定义文件中加上下面的中间件定义：
+
+```
+'think\middleware\SessionInit'
+```
+
 ### 在控制器中输出验证码
 
 在控制器的操作方法中使用
