@@ -4,7 +4,7 @@ thinkphp6 验证码类库
 
 ```text
 - 基于 ThinkPHP 6.0.x 编写
-- 测试环境为 ThinkPHP 6.0.1
+- 测试框架版本为 ThinkPHP 6.0.1
 - 必备php扩展 Imagick
 ```
 
@@ -16,7 +16,7 @@ thinkphp6 验证码类库
 
 ### 启用 Session
 
-`Session` 功能默认是没有开启的（验证码需要用到 Session），需要在全局的中间件定义文件中加上下面的中间件定义：
+ThinkPHP 6.0 下 `Session` 功能默认是没有开启的（API 通常不需要），如需开启可在 `全局中间件定义文件` 中加上下面的定义：
 
 ```
 'think\middleware\SessionInit'
