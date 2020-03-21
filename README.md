@@ -79,11 +79,15 @@ if(!captcha_check($captcha)){
 
 默认字体，支持的字符有限，如需增加其它字符请重新载入字体：
 
-| 目录            | 描述       |
-| --------------- | ---------- |
-| assets/fonts    | 常规字符集 |
-| assets/fonts@zh | 中文字符集 |
-| assets/math     | 算术字符集 |
+| 目录                 | 描述               |
+| -------------------- | ------------------ |
+| assets/fonts@default | 常规字符集         |
+| assets/fonts@zh      | 中文字符集         |
+| assets/fonts@math    | 算术字符集         |
+| assets/fonts@source  | FontForge 字体文件 |
+| assets/bgs           | 验证码背景图       |
+
+### 支持的字体类型
 
 支持 3 种类型的字体： `ttf` 、 `ttc` 、 `otc`
 
@@ -104,7 +108,7 @@ if(!captcha_check($captcha)){
 3. math 字符集
 
     ```text
-    0123456789+-*/%
+    0123456789+-*/
     ```
 
 ## 参考来源

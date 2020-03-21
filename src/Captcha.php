@@ -227,7 +227,7 @@ class Captcha
         $this->draw = new \ImagickDraw();
 
         // 验证码使用随机字体
-        $fontPath = __DIR__ . '/../assets/' . ($this->math ? 'fonts@math' : ($this->useZh ? 'fonts@zh' : 'fonts')) . '/';
+        $fontPath = __DIR__ . '/../assets/' . ($this->math ? 'fonts@math' : ($this->useZh ? 'fonts@zh' : 'fonts@default')) . '/';
 
         if (empty($this->fontFamily)) {
             $dir  = dir($fontPath);
