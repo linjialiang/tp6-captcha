@@ -102,13 +102,13 @@ if(!captcha_check($captcha)){
 2. 常规字符集
 
     ```text
-    2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY
+    2345678abcdefhjkmnpqrtuvwxyABCDEFHJKMNPQRTUVWXY
     ```
 
 3. math 字符集
 
     ```text
-    0123456789+-*/
+    空格字符+0123456789+-*/
     ```
 
 ## 参考来源

@@ -6,8 +6,6 @@
 return [
     // 验证码位数
     'length'     => 5,
-    // 验证码字符集合
-    'codeSet'    => '2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY',
     // 验证码过期时间
     'expire'     => 1800,
     // 是否使用中文验证码
@@ -22,6 +20,8 @@ return [
     'useCurve'   => false,
     // 是否添加杂点
     'useNoise'   => false,
+    // 杂色大小
+    'fontSizeNoise' => 20,
     // 验证码字体 不设置则随机
     'fontFamily' => '',
     // 背景颜色
@@ -32,8 +32,8 @@ return [
     'imageH'     => 0,
     // 验证码图片宽度
     'imageW'     => 0,
-    // 随机运算符号，支持加法(+)、加法(-)、加法(*)、加法(/)四则运算，不设置默认执行加法运算
-    'operators'  => ['+', '-'],
+    // 随机运算符号，支持加法(+)、减法(-)、乘法(*)、除法(/)四则运算
+    'operators'  => ['+', '-', '*', '/'],
 
     // 添加额外的验证码设置
     // verify => [

@@ -36,13 +36,19 @@ class Captcha
     // 验证码颜色
     protected string $color = '';
     // 验证码字符集合
-    protected string $codeSet = '2345678abcdefhijkmnpqrstuvwxyzABCDEFGHJKLMNPQRTUVWXY';
+    protected string $codeSet = '2345678abcdefhjkmnpqrtuvwxyABCDEFHJKMNPQRTUVWXY';
     // 验证码过期时间（s）
     protected int $expire = 1800;
     // 使用中文验证码
     protected bool $useZh = false;
     // 中文验证码字符串
     protected string $zhSet = '天地玄黄宇宙洪荒日月列张寒来暑往秋收冬闰余成岁律吕调阳云腾致雨结为金生丽水玉出昆冈剑号巨珠称夜光果珍李重姜海咸河淡羽翔龙师火帝鸟官人皇始制文字乃服衣裳推位让国有唐吊民伐罪周发汤坐朝问道垂拱平章爱育';
+    // 算术验证码
+    protected bool $math = false;
+    // 算术验证码字符集合
+    protected string $mathSet = '0123456789+-*/=';
+    // 随机运算符号，支持加法(+)、减法(-)、乘法(*)、除法(/)四则运算，默认执行加法运算
+    protected array $operators = ['+', '-', '*', '/'];
     // 使用背景图片
     protected bool $useImgBg = false;
     // 验证码字体大小(px)
@@ -51,6 +57,8 @@ class Captcha
     protected bool $useCurve = false;
     // 是否添加杂点
     protected bool $useNoise = false;
+    // 杂点大小
+    protected int $fontSizeNoise = 20;
     // 验证码图片高度
     protected int $imageH = 0;
     // 验证码图片宽度
@@ -61,10 +69,6 @@ class Captcha
     protected string $fontFamily = '';
     // 背景颜色
     protected string $bg = '';
-    // 算术验证码
-    protected bool $math = false;
-    // 随机运算符号，支持加(+)、减(-)、乘(*)、除(/)、取模(%)5种运算
-    protected array $operators = [];
 
     /**
      * 架构方法 设置参数
@@ -107,30 +111,27 @@ class Captcha
         $bag = '';
 
         if ($this->math) {
-            $this->useZh  = false;
-            $this->length = 5;
-
             $y   = random_int(1, 9);
 
             switch ($this->operators ? $this->operators[array_rand($this->operators)] : '+') {
                 case '-':
                     $x   = random_int(10, 30);
-                    $bag = "{$x} - {$y} = ";
+                    $bag = "{$x} - {$y} =";
                     $key = $x - $y;
                     break;
                 case '*':
                     $x = random_int(1, 10);
-                    $bag = "{$x} * {$y} = ";
+                    $bag = " {$x} * {$y} =";
                     $key = $x * $y;
                     break;
                 case '/':
                     $x = mt_rand(1, 10) * $y;
-                    $bag = "{$x} / {$y} = ";
+                    $bag = "{$x} / {$y} =";
                     $key = $x / $y;
                     break;
                 default:
                     $x   = random_int(10, 30);
-                    $bag = "{$x} + {$y} = ";
+                    $bag = "{$x} + {$y} =";
                     $key = $x + $y;
                     break;
             }
@@ -397,7 +398,7 @@ class Captcha
 
         foreach ($text as $index => $char) {
             // 文本字体大小
-            $this->draw->setFontSize($this->fontSize / 2);
+            $this->draw->setFontSize($this->fontSizeNoise);
             // 文本随机颜色（验证码颜色）
             $this->draw->setFillColor(
                 'rgba(' .
