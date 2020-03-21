@@ -110,15 +110,16 @@ class Captcha
             $this->useZh  = false;
             $this->length = 5;
 
-            $x   = random_int(10, 30);
             $y   = random_int(1, 9);
 
             switch ($this->operators ? $this->operators[array_rand($this->operators)] : '+') {
                 case '-':
+                    $x   = random_int(10, 30);
                     $bag = "{$x} - {$y} = ";
                     $key = $x - $y;
                     break;
                 case '*':
+                    $x = random_int(1, 10);
                     $bag = "{$x} * {$y} = ";
                     $key = $x * $y;
                     break;
@@ -127,11 +128,8 @@ class Captcha
                     $bag = "{$x} / {$y} = ";
                     $key = $x / $y;
                     break;
-                case '%':
-                    $bag = "{$x} % {$y} = ";
-                    $key = $x % $y;
-                    break;
                 default:
+                    $x   = random_int(10, 30);
                     $bag = "{$x} + {$y} = ";
                     $key = $x + $y;
                     break;
