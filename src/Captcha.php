@@ -381,14 +381,15 @@ class Captcha
     protected function writeNoise(): void
     {
         $bag = '';
-
-        if (!$this->math && $this->useZh) {
+        if ($this->math) {
+            $characters = str_split($this->mathSet);
+        } elseif ($this->useZh) {
             $characters = preg_split('/(?<!^)(?!$)/u', $this->zhSet);
         } else {
             $characters = str_split($this->codeSet);
         }
 
-        for ($i = 0; $i < 30; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $bag .= $characters[rand(0, count($characters) - 1)];
         }
 
